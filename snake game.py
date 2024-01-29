@@ -17,9 +17,9 @@ grid_line_color = 'blue'
 background_color = 'black'
 
 # set up values for snake segments
-height = grid_unit
-width = grid_unit
-x, y = grid_unit, grid_unit
+height = grid_box_size
+width = grid_box_size
+x, y = grid_line_width, grid_line_width
 speed = grid_unit
 direction = 'r'
 
