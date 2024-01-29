@@ -136,6 +136,7 @@ while running:
             caboose = pygame.Rect(tail_x - x_diff, tail_y, grid_box_size, grid_box_size)
         if y_diff != 0:
             caboose = pygame.Rect(tail_x, tail_y - y_diff, grid_box_size, grid_box_size)
+        # add new tail to end of snake
         snake.append(caboose)
 
 
