@@ -11,7 +11,7 @@ running = True
 
 # set up grid and background display values
 grid_line_width = 4
-grid_box_size = 15
+grid_box_size = 18
 grid_unit = grid_line_width + grid_box_size
 
 # color values
@@ -22,8 +22,8 @@ rat_color = 'gray'
 
 # set up values for snake segments
 x_pos, y_pos = grid_line_width, grid_line_width
-speed = grid_unit
 direction = 'r'
+speed = grid_unit
 
 # set up snake
 head = pygame.Rect(x_pos, y_pos, grid_box_size, grid_box_size)
@@ -31,14 +31,17 @@ snake = [head]
 
 # set up first rat
 x = rand(0, screen_width, grid_unit) + grid_line_width
-y = rand(0, screen_height, grid_unit) + grid_line_width 
-rat = pygame.Rect(x, y, grid_box_size, grid_box_size)
+y = rand(0, screen_height, grid_unit) + grid_line_width
+rat_size = grid_box_size
+# rat buffer to prevent rat from spawning near the edges
+rat_buffer = grid_unit *2
+rat = pygame.Rect(x, y, rat_size, rat_size)
 rat_exists = True
 
 # counter for snake speed. wait is how many fames to wait to move
 # wait/FPS is grid units per second
 counter = 0
-wait = 5
+wait = 6
 
 
 while running:
@@ -77,9 +80,9 @@ while running:
     # generate and draw rat if it doesn't exist
     # if it does just draw it
     if not rat_exists:
-        x = rand(0, screen_width, grid_unit) + grid_line_width
-        y = rand(0, screen_height, grid_unit) + grid_line_width 
-        rat = pygame.Rect(x, y, grid_box_size, grid_box_size)
+        x = rand(rat_buffer, screen_width - rat_buffer, grid_unit) + grid_line_width
+        y = rand(rat_buffer, screen_height - rat_buffer, grid_unit) + grid_line_width 
+        rat = pygame.Rect(x, y, rat_size, rat_size)
         pygame.draw.rect(screen, rat_color, rat)
         rat_exists = True
     if rat_exists:
@@ -105,7 +108,7 @@ while running:
             # send old value to the next segment
             previous_x = temp_x
             previous_y = temp_y
-    # draw the snake
+    # draw the snake every frame
     for segment in snake:
         pygame.draw.rect(screen, snake_color, segment)
     counter += 1
@@ -138,12 +141,38 @@ while running:
             caboose = pygame.Rect(tail_x, tail_y - y_diff, grid_box_size, grid_box_size)
         # add new tail to end of snake
         snake.append(caboose)
+        # set condition to make new rat
+        rat_exists = False
+
+
+    # if the snake touches the edge then restart
+    if x_pos < 0 or y_pos < 0 or x_pos > screen_width or y_pos > screen_height:
+        snake = [snake[0]]
+        x_pos, y_pos = grid_line_width, grid_line_width
+        direction = 'r'
+        rat_exists = False
+    
+    # if the snake touches itself then restart
+    # it can't do that if it's smaller than 5 segments
+    if len(snake)> 4:
+        # go backwards through segments and check if they're in the same spot as the head
+        for segment in snake[-1:-(len(snake)-1):-1]:
+            seg_x = segment.x
+            seg_y = segment.y
+            if seg_x == x_pos and seg_y == y_pos:
+                snake = [snake[0]]
+                x_pos, y_pos = grid_line_width, grid_line_width
+                direction = 'r'
+                rat_exists = False
+                break
 
 
     # flip() the display to put your work on screen
     pygame.display.flip()
 
+
     # limits FPS
     clock.tick(FPS)
 
 pygame.quit()
+
